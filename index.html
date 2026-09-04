@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StarVault - Earning App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Adsgram SDK -->
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
         :root {
@@ -136,7 +135,6 @@
     </style>
 </head>
 <body>
-
     <div class="header">
         <div class="logo">StarVault 💎</div>
         <div id="username" style="font-size: 13px; color: var(--text-gray);">User</div>
@@ -148,7 +146,6 @@
         <div style="font-size: 11px; color: var(--text-gray);">Min. Withdrawal: $5.00</div>
     </div>
 
-    <!-- Ads Section -->
     <div id="ads-section" class="section active">
         <div class="card">
             <h4>📺 Watch Video Ads</h4>
@@ -162,7 +159,6 @@
         </div>
     </div>
 
-    <!-- Tasks Section -->
     <div id="tasks-section" class="section">
         <div class="card">
             <h4>📢 Join Community</h4>
@@ -171,7 +167,6 @@
         </div>
     </div>
 
-    <!-- Invite Section -->
     <div id="invite-section" class="section">
         <div class="card">
             <h4>👥 Invite Friends</h4>
@@ -181,7 +176,6 @@
         </div>
     </div>
 
-    <!-- Withdraw Section -->
     <div id="withdraw-section" class="section">
         <div class="card">
             <h4>💳 Request Withdrawal</h4>
@@ -191,7 +185,6 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation Bar -->
     <div class="nav-bar">
         <button class="nav-item active" onclick="switchTab('ads', this)">⚡ Ads</button>
         <button class="nav-item" onclick="switchTab('tasks', this)">📋 Tasks</button>
@@ -200,17 +193,14 @@
     </div>
 
     <script>
-        // Telegram WebApp Setup with safety check
+        let tg = window.Telegram.WebApp;
         try {
-            let tg = window.Telegram.WebApp;
             tg.expand();
             if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
                 document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
                 document.getElementById('ref-link').value = https://t.me/Star_Vault_Official?start=ref_${tg.initDataUnsafe.user.id};
             }
-        } catch(e) {
-            console.log("Telegram WebApp not available:", e);
-        }
+        } catch(e) {}
 
         let balance = parseFloat(localStorage.getItem('sv_balance')) || 0.000;
         let adsLeft = localStorage.getItem('sv_adsLeft') !== null ? parseInt(localStorage.getItem('sv_adsLeft')) : 20;
@@ -219,21 +209,121 @@
 
         document.getElementById('balance').innerText = '$' + balance.toFixed(3);
         document.getElementById('ads-count').innerText = adsLeft;
-        function copyRef() {
-            try {
-                let linkInput = document.getElementById('ref-link');
-                linkInput.select();
-                navigator.clipboard.writeText(linkInput.value);
-                alert('Referral link copied!');
-            } catch(e) {
-                alert('Failed to copy link!');
+
+        if (dailyClaimed) {
+            let dBtn = document.getElementById('daily-btn');
+            dBtn.innerText = 'Already Claimed ✔';
+            dBtn.style.background = '#374151';
+        }
+
+        if (taskDone) {
+            let tBtn = document.getElementById('task-btn');
+            tBtn.innerText = 'Completed ✔';
+            tBtn.style.background = '#374151';
+        }
+        function saveData() {
+            localStorage.setItem('sv_balance', balance);
+            localStorage.setItem('sv_adsLeft', adsLeft);
+            localStorage.setItem('sv_dailyClaimed', dailyClaimed);
+            localStorage.setItem('sv_taskDone', taskDone);
+        }
+
+        function updateBalance() {
+            document.getElementById('balance').innerText = '$' + balance.toFixed(3);
+            saveData();
+        }
+
+        function switchTab(tabName, element) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(tabName + '-section').classList.add('active');
+            element.classList.add('active');
+        }
+
+        // Adsgram Setup با ئایدی 46107
+        let adController = null;
+        try {
+            if (window.Adsgram) {
+                adController = window.Adsgram.init({ blockId: "46107" });
+            }
+        } catch(e) {}
+
+        function watchAd() {
+            if (adsLeft <= 0) {
+                alert('You have reached the daily limit of 20 ads!');
+                return;
+            }
+
+            if (adController) {
+                adController.show().then((result) => {
+                    balance += 0.003;
+                    adsLeft--;
+                    document.getElementById('ads-count').innerText = adsLeft;
+                    updateBalance();
+                    alert('Success! You earned $0.003');
+                }).catch((result) => {
+                    // ئەگەر ڕیکلامەکە نەبوو یان داخرا، باڵانسەکە زیاد دەکەین بۆ ئەوەی دوگمەکە نەوەستێت
+                    balance += 0.003;
+                    adsLeft--;
+                    document.getElementById('ads-count').innerText = adsLeft;
+                    updateBalance();
+                    alert('Reward added!');
+                });
+            } else {
+                balance += 0.003;
+                adsLeft--;
+                document.getElementById('ads-count').innerText = adsLeft;
+                updateBalance();
+                alert('Success! You earned $0.003');
             }
         }
 
+        function claimDaily() {
+            if (dailyClaimed) {
+                alert('You already claimed your daily reward today!');
+                return;
+            }
+            balance += 0.002;
+            dailyClaimed = true;
+            
+            let dBtn = document.getElementById('daily-btn');
+            dBtn.innerText = 'Already Claimed ✔';
+            dBtn.style.background = '#374151';
+
+            updateBalance();
+            alert('Successfully claimed $0.002 daily reward!');
+        }
+
+        function completeTask() {
+            if (taskDone) {
+                alert('You have already completed this task!');
+                return;
+            }
+
+            window.open('https://t.me/Star_Vault_Official', '_blank');
+
+            setTimeout(() => {
+                balance += 0.08;
+                taskDone = true;
+                
+                let tBtn = document.getElementById('task-btn');
+                tBtn.innerText = 'Completed ✔';
+                tBtn.style.background = '#374151';
+
+                updateBalance();
+                alert('Task verified! Added $0.08 to your balance.');
+            }, 2000);
+        }
+
+        function copyRef() {
+            let linkInput = document.getElementById('ref-link');
+            linkInput.select();
+            navigator.clipboard.writeText(linkInput.value);
+            alert('Referral link copied!');
+        }
+
         function requestWithdraw() {
-            let walletInput = document.getElementById('wallet-input');
-            if (!walletInput) return;
-            let wallet = walletInput.value;
+            let wallet = document.getElementById('wallet-input').value;
             if (!wallet) {
                 alert('Please enter your wallet address!');
                 return;

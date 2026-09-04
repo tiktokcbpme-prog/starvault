@@ -139,7 +139,6 @@
         </div>
     </div>
     <script>
-        // Initialize Telegram WebApp safely
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
@@ -183,50 +182,42 @@
             localStorage.setItem('starvault_usd_balance', balance);
         }
 
-        // Safe Ad Function that handles Adsgram or fallback smoothly without breaking
+        // Strict Adsgram Integration (No free fake rewards)
+        let adController = null;
+        if (typeof window.Adsgram !== 'undefined') {
+            adController = window.Adsgram.init({ blockId: "46002" });
+        }
+
         function showAd() {
             if (adsLeft <= 0) {
                 alert("You have reached your daily ad limit (20/20)!");
                 return;
             }
 
-            if (typeof window.Adsgram !== 'undefined') {
-                try {
-                    const adController = window.Adsgram.init({ blockId: "46002" });
-                    adController.show().then(() => {
-                        completeAdReward();
-                    }).catch((err) => {
-                        // If ad is skipped or fails, use smooth fallback so the button works
-                        fallbackAdReward();
-                    });
-                    return;
-                } catch (e) {
-                    fallbackAdReward();
-                }
+            if (!adController && typeof window.Adsgram !== 'undefined') {
+                adController = window.Adsgram.init({ blockId: "46002" });
+            }
+
+            if (adController) {
+                adController.show().then(() => {
+                    // This runs ONLY when the real Adsgram ad is fully watched
+                    updateBalance(0.05);
+                    adsLeft--;
+                    document.getElementById('ads-left').innerText = adsLeft;
+                    localStorage.setItem('starvault_ads_left', adsLeft);
+                    localStorage.setItem('last_ad_date', new Date().toDateString());
+
+                    if (adsLeft <= 0) {
+                        document.getElementById('watch-btn').disabled = true;
+                        document.getElementById('watch-btn').innerText = "Limit";
+                    }
+                    alert("Success! You earned $0.05");
+                }).catch((err) => {
+                    alert("Ad was skipped or failed to load. No reward given.");
+                });
             } else {
-                fallbackAdReward();
+                alert("Adsgram ad network is loading. Please try again in a moment.");
             }
-        }
-
-        function fallbackAdReward() {
-            // Simulated smooth ad view if network/script blocks Adsgram
-            setTimeout(() => {
-                completeAdReward();
-            }, 500);
-        }
-
-        function completeAdReward() {
-            updateBalance(0.05);
-            adsLeft--;
-            document.getElementById('ads-left').innerText = adsLeft;
-            localStorage.setItem('starvault_ads_left', adsLeft);
-            localStorage.setItem('last_ad_date', new Date().toDateString());
-
-            if (adsLeft <= 0) {
-                document.getElementById('watch-btn').disabled = true;
-                document.getElementById('watch-btn').innerText = "Limit";
-            }
-            alert("Success! You earned $0.05");
         }
 
         function dailyCheckIn() {
@@ -243,9 +234,9 @@
             checkinBtn.disabled = true;
             alert("Daily check-in successful! +$0.10");
         }
+
         function joinCommunity() {
             window.open('https://t.me/Star_Vault_Official', '_blank');
-
             localStorage.setItem('joined_community', 'true');
             let joinBtn = document.getElementById('join-btn');
             joinBtn.innerText = "Completed";

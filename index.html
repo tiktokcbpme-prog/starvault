@@ -84,6 +84,10 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 14px;
+            transition: 0.2s;
+        }
+        button:active {
+            transform: scale(0.95);
         }
         button:disabled {
             background: #334155;
@@ -94,6 +98,7 @@
 </head>
 <body>
     <div class="container">
+        <!-- Header & Wallet -->
         <div class="header">
             <div class="wallet-info">
                 <small>Wallet Balance</small>
@@ -106,6 +111,7 @@
 
         <div class="section-title">Earning Tasks</div>
 
+        <!-- Watch Ad Task -->
         <div class="task-card">
             <div class="task-info">
                 <strong>Watch Video Ad</strong><br>
@@ -114,6 +120,7 @@
             <button id="watch-btn" onclick="showAd()">Watch</button>
         </div>
 
+        <!-- Daily Check-in Task -->
         <div class="task-card">
             <div class="task-info">
                 <strong>Daily Check-in</strong><br>
@@ -122,6 +129,7 @@
             <button id="checkin-btn" onclick="dailyCheckIn()">Claim</button>
         </div>
 
+        <!-- Join Community Task -->
         <div class="task-card">
             <div class="task-info">
                 <strong>Join Community</strong><br>
@@ -130,16 +138,16 @@
             <button id="join-btn" onclick="joinCommunity()">Join</button>
         </div>
     </div>
-
     <script>
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
         }
-            let balance = parseFloat(localStorage.getItem('starvault_usd_balance')) || 0.00;
-        let adsLeft = parseInt(localStorage.getItem('starvault_ads_left'));
-        let todayDate = new Date().toDateString();
+
+        let balance = parseFloat(localStorage.getItem('starvault_usd_balance')) || 0.00;
         let lastAdDate = localStorage.getItem('last_ad_date');
+        let todayDate = new Date().toDateString();
+        let adsLeft = parseInt(localStorage.getItem('starvault_ads_left'));
 
         if (lastAdDate !== todayDate || isNaN(adsLeft)) {
             adsLeft = 20;
@@ -151,9 +159,8 @@
         document.getElementById('ads-left').innerText = adsLeft;
 
         if (adsLeft <= 0) {
-            let btn = document.getElementById('watch-btn');
-            btn.disabled = true;
-            btn.innerText = "Limit";
+            document.getElementById('watch-btn').disabled = true;
+            document.getElementById('watch-btn').innerText = "Limit";
         }
 
         if (localStorage.getItem('joined_community') === 'true') {
@@ -162,7 +169,8 @@
             joinBtn.disabled = true;
         }
 
-        if (localStorage.getItem('last_checkin_date') === todayDate) {
+        let lastCheckIn = localStorage.getItem('last_checkin_date');
+        if (lastCheckIn === todayDate) {
             let checkinBtn = document.getElementById('checkin-btn');
             checkinBtn.innerText = "Claimed";
             checkinBtn.disabled = true;
@@ -174,58 +182,68 @@
             localStorage.setItem('starvault_usd_balance', balance);
         }
 
+        // Initialize Adsgram Controller globally
+        let adController = null;
+        if (typeof window.Adsgram !== 'undefined') {
+            adController = window.Adsgram.init({ blockId: "46002" });
+        }
+
         function showAd() {
             if (adsLeft <= 0) {
-                alert("You have reached your daily ad limit!");
+                alert("You have reached your daily ad limit (20/20)!");
                 return;
             }
 
-            if (typeof window.Adsgram === 'undefined') {
-                alert("Adsgram script is still loading. Please wait a second.");
-                return;
+            // Re-initialize if not loaded yet
+            if (!adController && typeof window.Adsgram !== 'undefined') {
+                adController = window.Adsgram.init({ blockId: "46002" });
             }
 
-            try {
-                const adController = window.Adsgram.init({ blockId: "46002" });
-                adController.show().then(() => {
+            if (adController) {
+                adController.show().then((result) => {
+                    // User successfully watched the ad
                     updateBalance(0.05);
                     adsLeft--;
                     document.getElementById('ads-left').innerText = adsLeft;
                     localStorage.setItem('starvault_ads_left', adsLeft);
-                    
+                    localStorage.setItem('last_ad_date', new Date().toDateString());
+
                     if (adsLeft <= 0) {
-                        let btn = document.getElementById('watch-btn');
-                        btn.disabled = true;
-                        btn.innerText = "Limit";
+                        document.getElementById('watch-btn').disabled = true;
+                        document.getElementById('watch-btn').innerText = "Limit";
                     }
                     alert("Success! You earned $0.05");
                 }).catch((result) => {
-                    alert("Ad was skipped or failed.");
+                    alert("Ad was skipped or failed to complete.");
                 });
-            } catch (err) {
-                alert("Error: " + err.message);
+            } else {
+                alert("Adsgram script is still loading. Please wait a second and try again.");
             }
         }
 
         function dailyCheckIn() {
-            if (localStorage.getItem('last_checkin_date') === todayDate) {
-                alert("Already claimed today!");
+            let today = new Date().toDateString();
+            if (localStorage.getItem('last_checkin_date') === today) {
+                alert("You have already claimed your daily reward today!");
                 return;
             }
+
             updateBalance(0.10);
-            localStorage.setItem('last_checkin_date', todayDate);
-            let btn = document.getElementById('checkin-btn');
-            btn.innerText = "Claimed";
-            btn.disabled = true;
-            alert("Reward claimed! +$0.10");
+            localStorage.setItem('last_checkin_date', today);
+            let checkinBtn = document.getElementById('checkin-btn');
+            checkinBtn.innerText = "Claimed";
+            checkinBtn.disabled = true;
+            alert("Daily check-in successful! +$0.10");
         }
 
+        function joinCommunity`() { // Wait, fix typo below if any
+        }
         function joinCommunity() {
             window.open('https://t.me/Star_Vault_Official', '_blank');
             localStorage.setItem('joined_community', 'true');
-            let btn = document.getElementById('join-btn');
-            btn.innerText = "Completed";
-            btn.disabled = true;
+            let joinBtn = document.getElementById('join-btn');
+            joinBtn.innerText = "Completed";
+            joinBtn.disabled = true;
             updateBalance(0.20);
             alert("Reward claimed! +$0.20");
         }

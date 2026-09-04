@@ -3,57 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StarVault</title>
+    <title>StarVault 💎</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #151a23;
+            --card-border: rgba(0, 242, 254, 0.15);
+            --accent-gradient: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            --green-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --text-main: #ffffff;
+            --text-secondary: #94a3b8;
+        }
+
         body {
-            background-color: #090a0f;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px 20px;
-        }
-        .card {
-            background: #13151f;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .btn {
-            background: linear-gradient(135deg, #00f2fe, #10b981);
-            color: #000;
-            border: none;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
             padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
+            padding-bottom: 100px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-tag {
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .balance-card {
+            background: linear-gradient(145deg, #151a23, #1e2532);
+            padding: 25px 20px;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .balance-title {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+        }
+
+        .balance-amount {
+            font-size: 36px;
+            font-weight: 900;
+            color: #10b981;
+            margin-bottom: 5px;
+        }
+
+        .balance-sub {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--card-border);
+        }
+
+        .card h4 {
+            margin: 0 0 6px 0;
+            color: #00f2fe;
+            font-size: 16px;
+        }
+
+        .card p {
+            margin: 0 0 15px 0;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .btn {
+            background: var(--accent-gradient);
+            color: #0b0e14;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 700;
             width: 100%;
             cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
+            font-size: 14px;
+            transition: transform 0.1s ease, opacity 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-green {
+            background: var(--green-gradient);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-disabled {
+            background: #2a3447 !important;
+            color: var(--text-secondary) !important;
+            box-shadow: none !important;
+            cursor: not-allowed;
+        }
+        .input-box {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #0b0e14;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(21, 26, 35, 0.95);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: #00f2fe;
         }
     </style>
 </head>
 <body>
 
-    <h1>StarVault 💎</h1>
-    <div class="card">
-        <h3>Balance: <span id="balance">$0.000</span></h3>
+    <div class="header">
+        <div class="logo">StarVault 💎</div>
+        <div id="username" class="user-tag">Player</div>
     </div>
 
-    <div class="card">
-        <p>Click test button:</p>
-        <button class="btn" onclick="testClick()">Click Me!</button>
+    <div class="balance-card">
+        <div class="balance-title">Total Balance</div>
+        <div class="balance-amount" id="balance">$0.000</div>
+        <div class="balance-sub">Min. Withdrawal: $5.00</div>
+    </div>
+
+    <!-- Ads Section -->
+    <div id="ads-section" class="section active">
+        <div class="card">
+            <h4>📺 Watch Video Ads</h4>
+            <p>Watch ads to earn $0.003 per view. Limit: <span id="ads-count">20</span>/20 today.</p>
+            <button class="btn" onclick="watchAd()">Watch Ad (+$0.003)</button>
+        </div>
+        <div class="card">
+            <h4>🎁 Daily Reward</h4>
+            <p>Claim your free daily bonus of $0.002 instantly.</p>
+            <button class="btn btn-green" id="daily-btn" onclick="claimDaily()">Claim Daily ($0.002)</button>
+        </div>
+    </div>
+
+    <!-- Tasks Section -->
+    <div id="tasks-section" class="section">
+        <div class="card">
+            <h4>📢 Join Community</h4>
+            <p>Join our official channel to get an instant reward of $0.08.</p>
+            <button class="btn" id="task-btn" onclick="completeTask()">Join Channel & Earn</button>
+        </div>
+    </div>
+
+    <!-- Invite Section -->
+    <div id="invite-section" class="section">
+        <div class="card">
+            <h4>👥 Invite Friends</h4>
+            <p>Share your link and earn $0.01 for every single referral!</p>
+            <input type="text" class="input-box" id="ref-link" readonly value="https://t.me/Star_Vault_Official">
+            <button class="btn" onclick="copyRef()">Copy Referral Link</button>
+        </div>
+    </div>
+
+    <!-- Withdraw Section -->
+    <div id="withdraw-section" class="section">
+        <div class="card">
+            <h4>💳 Request Payout</h4>
+            <p>Withdrawals are processed automatically once you reach $5.00.</p>
+            <input type="text" class="input-box" id="wallet-input" placeholder="Enter USDT TRC20 Address">
+            <button class="btn" onclick="requestWithdraw()">Withdraw Funds</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="nav-bar">
+        <button class="nav-item active" onclick="switchTab('ads', this)">⚡<br>Ads</button>
+        <button class="nav-item" onclick="switchTab('tasks', this)">📋<br>Tasks</button>
+        <button class="nav-item" onclick="switchTab('invite', this)">🔗<br>Invite</button>
+        <button class="nav-item" onclick="switchTab('withdraw', this)">💵<br>Withdraw</button>
     </div>
 
     <script>
-        let balance = parseFloat(localStorage.getItem('test_balance')) || 0;
-        document.getElementById('balance').innerText = '$' + balance.toFixed(3);
+        let tg = window.Telegram.WebApp;
+        try {
+            tg.expand();
+            if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
+                document.getElementById('ref-link').value = https://t.me/Star_Vault_Official?start=ref_${tg.initDataUnsafe.user.id};
+            }
+        } catch(e) {}
 
-        function testClick() {
-            balance += 0.003;
-            localStorage.setItem('test_balance', balance);
+        let balance = parseFloat(localStorage.getItem('sv_balance')) || 0.000;
+        let adsLeft = localStorage.getItem('sv_adsLeft') !== null ? parseInt(localStorage.getItem('sv_adsLeft')) : 20;
+        let dailyClaimed = localStorage.getItem('sv_dailyClaimed') === 'true';
+        let taskDone = localStorage.getItem('sv_taskDone') === 'true';
+
+        document.getElementById('balance').innerText = '$' + balance.toFixed(3);
+        document.getElementById('ads-count').innerText = adsLeft;
+
+        if (dailyClaimed) {
+            let dBtn = document.getElementById('daily-btn');
+            dBtn.innerText = 'Already Claimed ✔';
+            dBtn.classList.add('btn-disabled');
+            dBtn.classList.remove('btn-green');
+        }
+
+        if (taskDone) {
+            let tBtn = document.getElementById('task-btn');
+            tBtn.innerText = 'Completed ✔';
+            tBtn.classList.add('btn-disabled');
+        }
+
+        function saveData() {
+            localStorage.setItem('sv_balance', balance);
+            localStorage.setItem('sv_adsLeft', adsLeft);
+            localStorage.setItem('sv_dailyClaimed', dailyClaimed);
+            localStorage.setItem('sv_taskDone', taskDone);
+        }
+
+        function updateBalance() {
             document.getElementById('balance').innerText = '$' + balance.toFixed(3);
-            alert('Working perfectly! Balance updated.');
+            saveData();
+        }
+
+        function switchTab(tabName, element) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(tabName + '-section').classList.add('active');
+            element.classList.add('active');
+        }
+
+        function watchAd() {
+            if (adsLeft <= 0) {
+                alert('You have reached the daily limit of 20 ads!');
+                return;
+            }
+            balance += 0.003;
+            adsLeft--;
+            document.getElementById('ads-count').innerText = adsLeft;
+            updateBalance();
+            alert('Success! Added $0.003 to your balance.');
+        }
+
+        function claimDaily() {
+            if (dailyClaimed) {
+                alert('You already claimed your daily reward today!');
+                return;
+            }
+            balance += 0.002;
+            dailyClaimed = true;
+            
+            let dBtn = document.getElementById('daily-btn');
+            dBtn.innerText = 'Already Claimed ✔';
+            dBtn.classList.add('btn-disabled');
+            dBtn.classList.remove('btn-green');
+
+            updateBalance();
+            alert('Successfully claimed $0.002 daily reward!');
+        }
+
+        function completeTask() {
+            if (taskDone) {
+                alert('You have already completed this task!');
+                return;
+            }
+
+            window.open('https://t.me/Star_Vault_Official', '_blank');
+
+            setTimeout(() => {
+                balance += 0.08;
+                taskDone = true;
+                
+                let tBtn = document.getElementById('task-btn');
+                tBtn.innerText = 'Completed ✔';
+                tBtn.classList.add('btn-disabled');
+
+                updateBalance();
+                alert('Task verified! Added $0.08 to your balance.');
+            }, 2000);
+        }
+
+        function copyRef() {
+            let linkInput = document.getElementById('ref-link');
+            linkInput.select();
+            navigator.clipboard.writeText(linkInput.value);
+            alert('Referral link copied successfully!');
+        }
+        function requestWithdraw() {
+            let wallet = document.getElementById('wallet-input').value;
+            if (!wallet) {
+                alert('Please enter your wallet address!');
+                return;
+            }
+            if (balance < 5.00) {
+                alert('Insufficient balance! Minimum withdrawal is $5.00');
+                return;
+            }
+            alert('Withdrawal request submitted successfully!');
         }
     </script>
 </body>

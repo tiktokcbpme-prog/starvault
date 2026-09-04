@@ -1,28 +1,145 @@
-<script>
-        // Initialize Telegram WebApp
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarVault</title>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Adsgram Script Integration -->
+    <script src="https://sad.adsgram.ai/js/adsgram.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #090d16;
+            color: #ffffff;
+            text-align: center;
+            padding: 15px;
+            margin: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #131c2e;
+            padding: 12px 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #1e293b;
+        }
+        .wallet-info {
+            text-align: left;
+        }
+        .wallet-info small {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+        .wallet-info h3 {
+            margin: 2px 0 0 0;
+            color: #38bdf8;
+            font-size: 20px;
+        }
+        .ads-counter {
+            background: #1e293b;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #fbbf24;
+            font-weight: bold;
+        }
+        .section-title {
+            text-align: left;
+            font-size: 16px;
+            margin: 20px 0 10px 5px;
+            color: #cbd5e1;
+        }
+        .task-card {
+            background: #131c2e;
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: left;
+            border: 1px solid #1e293b;
+        }
+        .task-info strong {
+            font-size: 15px;
+            color: #f8fafc;
+        }
+        .task-info small {
+            color: #94a3b8;
+        }
+        button {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        button:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="wallet-info">
+                <small>Wallet Balance</small>
+                <h3 id="balance">$0.00</h3>
+            </div>
+            <div class="ads-counter">
+                🎁 Ads: <span id="ads-left">20</span>/20
+            </div>
+        </div>
+
+        <div class="section-title">Earning Tasks</div>
+
+        <div class="task-card">
+            <div class="task-info">
+                <strong>Watch Video Ad</strong><br>
+                <small>Earn $0.05 per ad</small>
+            </div>
+            <button id="watch-btn" onclick="showAd()">Watch</button>
+        </div>
+
+        <div class="task-card">
+            <div class="task-info">
+                <strong>Daily Check-in</strong><br>
+                <small>Earn $0.10 daily</small>
+            </div>
+            <button id="checkin-btn" onclick="dailyCheckIn()">Claim</button>
+        </div>
+
+        <div class="task-card">
+            <div class="task-info">
+                <strong>Join Community</strong><br>
+                <small>Earn $0.20 bonus</small>
+            </div>
+            <button id="join-btn" onclick="joinCommunity()">Join</button>
+        </div>
+    </div>
+
+    <script>
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
         }
-
-        let adController = null;
-
-        // Initialize Adsgram Controller when page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            if (typeof window.Adsgram !== 'undefined') {
-                try {
-                    adController = window.Adsgram.init({ blockId: "46002" });
-                } catch (e) {
-                    console.error("Adsgram init error:", e);
-                }
-            }
-        });
-
-        let balance = parseFloat(localStorage.getItem('starvault_usd_balance')) || 0.00;
-        
-        let lastAdDate = localStorage.getItem('last_ad_date');
-        let todayDate = new Date().toDateString();
+            let balance = parseFloat(localStorage.getItem('starvault_usd_balance')) || 0.00;
         let adsLeft = parseInt(localStorage.getItem('starvault_ads_left'));
+        let todayDate = new Date().toDateString();
+        let lastAdDate = localStorage.getItem('last_ad_date');
 
         if (lastAdDate !== todayDate || isNaN(adsLeft)) {
             adsLeft = 20;
@@ -34,8 +151,9 @@
         document.getElementById('ads-left').innerText = adsLeft;
 
         if (adsLeft <= 0) {
-            document.getElementById('watch-btn').disabled = true;
-            document.getElementById('watch-btn').innerText = "Limit";
+            let btn = document.getElementById('watch-btn');
+            btn.disabled = true;
+            btn.innerText = "Limit";
         }
 
         if (localStorage.getItem('joined_community') === 'true') {
@@ -44,8 +162,7 @@
             joinBtn.disabled = true;
         }
 
-        let lastCheckIn = localStorage.getItem('last_checkin_date');
-        if (lastCheckIn === todayDate) {
+        if (localStorage.getItem('last_checkin_date') === todayDate) {
             let checkinBtn = document.getElementById('checkin-btn');
             checkinBtn.innerText = "Claimed";
             checkinBtn.disabled = true;
@@ -59,62 +176,56 @@
 
         function showAd() {
             if (adsLeft <= 0) {
-                alert("You have reached your daily ad limit (20/20)!");
+                alert("You have reached your daily ad limit!");
                 return;
             }
 
-            if (!adController) {
-                if (typeof window.Adsgram !== 'undefined') {
-                    try {
-                        adController = window.Adsgram.init({ blockId: "46002" });
-                    } catch (e) {}
-                }
+            if (typeof window.Adsgram === 'undefined') {
+                alert("Adsgram script is still loading. Please wait a second.");
+                return;
             }
 
-            if (adController) {
+            try {
+                const adController = window.Adsgram.init({ blockId: "46002" });
                 adController.show().then(() => {
-                    // User watched the ad completely
                     updateBalance(0.05);
                     adsLeft--;
                     document.getElementById('ads-left').innerText = adsLeft;
                     localStorage.setItem('starvault_ads_left', adsLeft);
-                    localStorage.setItem('last_ad_date', new Date().toDateString());
-
+                    
                     if (adsLeft <= 0) {
-                        document.getElementById('watch-btn').disabled = true;
-                        document.getElementById('watch-btn').innerText = "Limit";
+                        let btn = document.getElementById('watch-btn');
+                        btn.disabled = true;
+                        btn.innerText = "Limit";
                     }
                     alert("Success! You earned $0.05");
                 }).catch((result) => {
-                    alert("Ad was skipped or not finished. No reward given.");
+                    alert("Ad was skipped or failed.");
                 });
-            } else {
-                alert("Adsgram is still loading or blocked. Please wait a few seconds and try again.");
+            } catch (err) {
+                alert("Error: " + err.message);
             }
         }
 
         function dailyCheckIn() {
-            let today = new Date().toDateString();
-            if (localStorage.getItem('last_checkin_date') === today) {
-                alert("You have already claimed your daily reward today!");
+            if (localStorage.getItem('last_checkin_date') === todayDate) {
+                alert("Already claimed today!");
                 return;
             }
             updateBalance(0.10);
-            localStorage.setItem('last_checkin_date', today);
-            let checkinBtn = document.getElementById('checkin-btn');
-            checkinBtn.innerText = "Claimed";
-            checkinBtn.disabled = true;
-            alert("Daily check-in successful! +$0.10");
+            localStorage.setItem('last_checkin_date', todayDate);
+            let btn = document.getElementById('checkin-btn');
+            btn.innerText = "Claimed";
+            btn.disabled = true;
+            alert("Reward claimed! +$0.10");
         }
 
         function joinCommunity() {
             window.open('https://t.me/Star_Vault_Official', '_blank');
-
             localStorage.setItem('joined_community', 'true');
-            let joinBtn = document.getElementById('join-btn');
-            joinBtn.innerText = "Completed";
-            joinBtn.disabled = true;
-            
+            let btn = document.getElementById('join-btn');
+            btn.innerText = "Completed";
+            btn.disabled = true;
             updateBalance(0.20);
             alert("Reward claimed! +$0.20");
         }

@@ -3,336 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StarVault - Earning App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <title>StarVault</title>
     <style>
-        :root {
-            --bg-black: #090a0f;
-            --card-dark: #13151f;
-            --pure-white: #ffffff;
-            --neon-blue: #00f2fe;
-            --neon-green: #10b981;
-            --accent-gradient: linear-gradient(135deg, #00f2fe, #10b981);
-            --text-gray: #94a3b8;
-        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-black);
-            color: var(--pure-white);
-            margin: 0;
-            padding: 0;
-            padding-bottom: 90px;
-        }
-        .header {
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            background: rgba(19, 21, 31, 0.8);
-        }
-        .logo {
-            font-size: 22px;
-            font-weight: bold;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .balance-card {
-            background: linear-gradient(135deg, #13151f, #1a1e29);
-            margin: 20px;
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(0, 242, 254, 0.2);
-            box-shadow: 0 8px 25px rgba(0, 242, 254, 0.1);
-        }
-        .balance-title {
-            font-size: 12px;
-            color: var(--text-gray);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .balance-amount {
-            font-size: 32px;
-            font-weight: bold;
-            margin: 8px 0;
-            color: var(--neon-green);
-        }
-        .section {
-            display: none;
-            padding: 20px;
-        }
-        .section.active {
-            display: block;
+            background-color: #090a0f;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px 20px;
         }
         .card {
-            background-color: var(--card-dark);
-            padding: 18px;
-            border-radius: 16px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .card h4 {
-            margin: 0 0 8px 0;
-            color: var(--neon-blue);
-            font-size: 16px;
-        }
-        .card p {
-            margin: 0 0 12px 0;
-            font-size: 13px;
-            color: var(--text-gray);
+            background: #13151f;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .btn {
-            background: var(--accent-gradient);
+            background: linear-gradient(135deg, #00f2fe, #10b981);
             color: #000;
             border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-weight: bold;
-            width: 100%;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.2s;
-        }
-        .btn:active {
-            transform: scale(0.98);
-        }
-        .input-box {
-            width: 100%;
-            padding: 12px;
+            padding: 15px;
             border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: var(--bg-black);
-            color: var(--pure-white);
-            margin-bottom: 12px;
-            box-sizing: border-box;
-        }
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--card-dark);
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            backdrop-filter: blur(10px);
-        }
-        .nav-item {
-            background: none;
-            border: none;
-            color: var(--text-gray);
-            font-size: 12px;
-            cursor: pointer;
-            text-align: center;
-        }
-        .nav-item.active {
-            color: var(--neon-blue);
             font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">StarVault 💎</div>
-        <div id="username" style="font-size: 13px; color: var(--text-gray);">User</div>
+
+    <h1>StarVault 💎</h1>
+    <div class="card">
+        <h3>Balance: <span id="balance">$0.000</span></h3>
     </div>
 
-    <div class="balance-card">
-        <div class="balance-title">Total Balance</div>
-        <div class="balance-amount" id="balance">$0.000</div>
-        <div style="font-size: 11px; color: var(--text-gray);">Min. Withdrawal: $5.00</div>
-    </div>
-
-    <div id="ads-section" class="section active">
-        <div class="card">
-            <h4>📺 Watch Video Ads</h4>
-            <p>Watch ad to earn $0.003. Limit: <span id="ads-count">20</span>/20 today.</p>
-            <button class="btn" onclick="watchAd()">Watch Ad (+$0.003)</button>
-        </div>
-        <div class="card">
-            <h4>🎁 Daily Reward</h4>
-            <p>Claim your free daily bonus of $0.002.</p>
-            <button class="btn" id="daily-btn" style="background: var(--neon-green); color: #fff;" onclick="claimDaily()">Claim Daily ($0.002)</button>
-        </div>
-    </div>
-
-    <div id="tasks-section" class="section">
-        <div class="card">
-            <h4>📢 Join Community</h4>
-            <p>Join our official channel to earn $0.08.</p>
-            <button class="btn" id="task-btn" onclick="completeTask()">Join Channel & Earn $0.08</button>
-        </div>
-    </div>
-
-    <div id="invite-section" class="section">
-        <div class="card">
-            <h4>👥 Invite Friends</h4>
-            <p>Earn $0.01 for every single referral friend!</p>
-            <input type="text" class="input-box" id="ref-link" readonly value="https://t.me/Star_Vault_Official">
-            <button class="btn" onclick="copyRef()">Copy Referral Link</button>
-        </div>
-    </div>
-
-    <div id="withdraw-section" class="section">
-        <div class="card">
-            <h4>💳 Request Withdrawal</h4>
-            <p>Minimum payout is $5.00. Enter your wallet address:</p>
-            <input type="text" class="input-box" id="wallet-input" placeholder="USDT TRC20 Address">
-            <button class="btn" onclick="requestWithdraw()">Withdraw Funds</button>
-        </div>
-    </div>
-
-    <div class="nav-bar">
-        <button class="nav-item active" onclick="switchTab('ads', this)">⚡ Ads</button>
-        <button class="nav-item" onclick="switchTab('tasks', this)">📋 Tasks</button>
-        <button class="nav-item" onclick="switchTab('invite', this)">🔗 Invite</button>
-        <button class="nav-item" onclick="switchTab('withdraw', this)">💵 Withdraw</button>
+    <div class="card">
+        <p>Click test button:</p>
+        <button class="btn" onclick="testClick()">Click Me!</button>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        try {
-            tg.expand();
-            if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
-                document.getElementById('ref-link').value = https://t.me/Star_Vault_Official?start=ref_${tg.initDataUnsafe.user.id};
-            }
-        } catch(e) {}
-
-        let balance = parseFloat(localStorage.getItem('sv_balance')) || 0.000;
-        let adsLeft = localStorage.getItem('sv_adsLeft') !== null ? parseInt(localStorage.getItem('sv_adsLeft')) : 20;
-        let dailyClaimed = localStorage.getItem('sv_dailyClaimed') === 'true';
-        let taskDone = localStorage.getItem('sv_taskDone') === 'true';
-
+        let balance = parseFloat(localStorage.getItem('test_balance')) || 0;
         document.getElementById('balance').innerText = '$' + balance.toFixed(3);
-        document.getElementById('ads-count').innerText = adsLeft;
 
-        if (dailyClaimed) {
-            let dBtn = document.getElementById('daily-btn');
-            dBtn.innerText = 'Already Claimed ✔';
-            dBtn.style.background = '#374151';
-        }
-
-        if (taskDone) {
-            let tBtn = document.getElementById('task-btn');
-            tBtn.innerText = 'Completed ✔';
-            tBtn.style.background = '#374151';
-        }
-        function saveData() {
-            localStorage.setItem('sv_balance', balance);
-            localStorage.setItem('sv_adsLeft', adsLeft);
-            localStorage.setItem('sv_dailyClaimed', dailyClaimed);
-            localStorage.setItem('sv_taskDone', taskDone);
-        }
-
-        function updateBalance() {
+        function testClick() {
+            balance += 0.003;
+            localStorage.setItem('test_balance', balance);
             document.getElementById('balance').innerText = '$' + balance.toFixed(3);
-            saveData();
-        }
-
-        function switchTab(tabName, element) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(tabName + '-section').classList.add('active');
-            element.classList.add('active');
-        }
-
-        // Adsgram Setup با ئایدی 46107
-        let adController = null;
-        try {
-            if (window.Adsgram) {
-                adController = window.Adsgram.init({ blockId: "46107" });
-            }
-        } catch(e) {}
-
-        function watchAd() {
-            if (adsLeft <= 0) {
-                alert('You have reached the daily limit of 20 ads!');
-                return;
-            }
-
-            if (adController) {
-                adController.show().then((result) => {
-                    balance += 0.003;
-                    adsLeft--;
-                    document.getElementById('ads-count').innerText = adsLeft;
-                    updateBalance();
-                    alert('Success! You earned $0.003');
-                }).catch((result) => {
-                    // ئەگەر ڕیکلامەکە نەبوو یان داخرا، باڵانسەکە زیاد دەکەین بۆ ئەوەی دوگمەکە نەوەستێت
-                    balance += 0.003;
-                    adsLeft--;
-                    document.getElementById('ads-count').innerText = adsLeft;
-                    updateBalance();
-                    alert('Reward added!');
-                });
-            } else {
-                balance += 0.003;
-                adsLeft--;
-                document.getElementById('ads-count').innerText = adsLeft;
-                updateBalance();
-                alert('Success! You earned $0.003');
-            }
-        }
-
-        function claimDaily() {
-            if (dailyClaimed) {
-                alert('You already claimed your daily reward today!');
-                return;
-            }
-            balance += 0.002;
-            dailyClaimed = true;
-            
-            let dBtn = document.getElementById('daily-btn');
-            dBtn.innerText = 'Already Claimed ✔';
-            dBtn.style.background = '#374151';
-
-            updateBalance();
-            alert('Successfully claimed $0.002 daily reward!');
-        }
-
-        function completeTask() {
-            if (taskDone) {
-                alert('You have already completed this task!');
-                return;
-            }
-
-            window.open('https://t.me/Star_Vault_Official', '_blank');
-
-            setTimeout(() => {
-                balance += 0.08;
-                taskDone = true;
-                
-                let tBtn = document.getElementById('task-btn');
-                tBtn.innerText = 'Completed ✔';
-                tBtn.style.background = '#374151';
-
-                updateBalance();
-                alert('Task verified! Added $0.08 to your balance.');
-            }, 2000);
-        }
-
-        function copyRef() {
-            let linkInput = document.getElementById('ref-link');
-            linkInput.select();
-            navigator.clipboard.writeText(linkInput.value);
-            alert('Referral link copied!');
-        }
-
-        function requestWithdraw() {
-            let wallet = document.getElementById('wallet-input').value;
-            if (!wallet) {
-                alert('Please enter your wallet address!');
-                return;
-            }
-            if (balance < 5.00) {
-                alert('Insufficient balance! Minimum withdrawal is $5.00');
-                return;
-            }
-            alert('Withdrawal request submitted successfully!');
+            alert('Working perfectly! Balance updated.');
         }
     </script>
 </body>

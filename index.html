@@ -1,144 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StarVault</title>
-    <!-- Adsgram Script Integration -->
-    <script src="https://sad.adsgram.ai/js/adsgram.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #090d16;
-            color: #ffffff;
-            text-align: center;
-            padding: 15px;
-            margin: 0;
+<script>
+        // Initialize Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
         }
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #131c2e;
-            padding: 12px 18px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #1e293b;
-        }
-        .wallet-info {
-            text-align: left;
-        }
-        .wallet-info small {
-            color: #94a3b8;
-            font-size: 12px;
-        }
-        .wallet-info h3 {
-            margin: 2px 0 0 0;
-            color: #38bdf8;
-            font-size: 20px;
-        }
-        .ads-counter {
-            background: #1e293b;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #fbbf24;
-            font-weight: bold;
-        }
-        .section-title {
-            text-align: left;
-            font-size: 16px;
-            margin: 20px 0 10px 5px;
-            color: #cbd5e1;
-        }
-        .task-card {
-            background: #131c2e;
-            padding: 14px 16px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-align: left;
-            border: 1px solid #1e293b;
-        }
-        .task-info strong {
-            font-size: 15px;
-            color: #f8fafc;
-        }
-        .task-info small {
-            color: #94a3b8;
-        }
-        button {
-            background: #0284c7;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: 0.2s;
-        }
-        button:active {
-            transform: scale(0.95);
-        }
-        button:disabled {
-            background: #334155;
-            color: #64748b;
-            cursor: not-allowed;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Header & Wallet -->
-        <div class="header">
-            <div class="wallet-info">
-                <small>Wallet Balance</small>
-                <h3 id="balance">$0.00</h3>
-            </div>
-            <div class="ads-counter">
-                🎁 Ads: <span id="ads-left">20</span>/20
-            </div>
-        </div>
 
-        <div class="section-title">Earning Tasks</div>
+        let adController = null;
 
-        <!-- Watch Ad Task -->
-        <div class="task-card">
-            <div class="task-info">
-                <strong>Watch Video Ad</strong><br>
-                <small>Earn $0.05 per ad</small>
-            </div>
-            <button id="watch-btn" onclick="showAd()">Watch</button>
-        </div>
+        // Initialize Adsgram Controller when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof window.Adsgram !== 'undefined') {
+                try {
+                    adController = window.Adsgram.init({ blockId: "46002" });
+                } catch (e) {
+                    console.error("Adsgram init error:", e);
+                }
+            }
+        });
 
-        <!-- Daily Check-in Task -->
-        <div class="task-card">
-            <div class="task-info">
-                <strong>Daily Check-in</strong><br>
-                <small>Earn $0.10 daily</small>
-            </div>
-            <button id="checkin-btn" onclick="dailyCheckIn()">Claim</button>
-        </div>
-
-        <!-- Join Community Task -->
-        <div class="task-card">
-            <div class="task-info">
-                <strong>Join Community</strong><br>
-                <small>Earn $0.20 bonus</small>
-            </div>
-            <button id="join-btn" onclick="joinCommunity()">Join</button>
-        </div>
-        <script>
         let balance = parseFloat(localStorage.getItem('starvault_usd_balance')) || 0.00;
         
-        // Reset or set ads limit to 20 daily
         let lastAdDate = localStorage.getItem('last_ad_date');
         let todayDate = new Date().toDateString();
         let adsLeft = parseInt(localStorage.getItem('starvault_ads_left'));
@@ -157,14 +38,12 @@
             document.getElementById('watch-btn').innerText = "Limit";
         }
 
-        // Check if Community was already joined before
         if (localStorage.getItem('joined_community') === 'true') {
             let joinBtn = document.getElementById('join-btn');
             joinBtn.innerText = "Completed";
             joinBtn.disabled = true;
         }
 
-        // Check if Daily Check-in was already claimed today
         let lastCheckIn = localStorage.getItem('last_checkin_date');
         if (lastCheckIn === todayDate) {
             let checkinBtn = document.getElementById('checkin-btn');
@@ -184,9 +63,17 @@
                 return;
             }
 
-            if (window.Adsgram) {
-                const adController = window.Adsgram.init({ blockId: "46002" });
+            if (!adController) {
+                if (typeof window.Adsgram !== 'undefined') {
+                    try {
+                        adController = window.Adsgram.init({ blockId: "46002" });
+                    } catch (e) {}
+                }
+            }
+
+            if (adController) {
                 adController.show().then(() => {
+                    // User watched the ad completely
                     updateBalance(0.05);
                     adsLeft--;
                     document.getElementById('ads-left').innerText = adsLeft;
@@ -199,10 +86,10 @@
                     }
                     alert("Success! You earned $0.05");
                 }).catch((result) => {
-                    alert("Ad was not completed or failed to load.");
+                    alert("Ad was skipped or not finished. No reward given.");
                 });
             } else {
-                alert("Adsgram script is still loading. Please wait a second and try again.");
+                alert("Adsgram is still loading or blocked. Please wait a few seconds and try again.");
             }
         }
 
@@ -212,7 +99,6 @@
                 alert("You have already claimed your daily reward today!");
                 return;
             }
-
             updateBalance(0.10);
             localStorage.setItem('last_checkin_date', today);
             let checkinBtn = document.getElementById('checkin-btn');
@@ -235,4 +121,3 @@
     </script>
 </body>
 </html>
-    </div>

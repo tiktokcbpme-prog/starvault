@@ -3,247 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StarVault</title>
-    <!-- Telegram Web App SDK -->
+    <title>StarVault - Earning App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Adsgram Script Integration -->
-    <script src="https://sad.adsgram.ai/js/adsgram.js"></script>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #090d16;
-            color: #ffffff;
-            text-align: center;
-            padding: 15px;
-            margin: 0;
+        :root {
+            --bg-black: #090a0f;
+            --card-dark: #13151f;
+            --pure-white: #ffffff;
+            --neon-blue: #00f2fe;
+            --neon-green: #10b981;
+            --accent-gradient: linear-gradient(135deg, #00f2fe, #10b981);
+            --text-gray: #94a3b8;
         }
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-black);
+            color: var(--pure-white);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 90px;
         }
         .header {
+            padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #131c2e;
-            padding: 12px 18px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #1e293b;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(19, 21, 31, 0.8);
         }
-        .wallet-info {
-            text-align: left;
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .wallet-info small {
-            color: #94a3b8;
+        .balance-card {
+            background: linear-gradient(135deg, #13151f, #1a1e29);
+            margin: 20px;
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 242, 254, 0.1);
+        }
+        .balance-title {
             font-size: 12px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .wallet-info h3 {
-            margin: 2px 0 0 0;
-            color: #38bdf8;
-            font-size: 20px;
-        }
-        .ads-counter {
-            background: #1e293b;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #fbbf24;
+        .balance-amount {
+            font-size: 32px;
             font-weight: bold;
+            margin: 8px 0;
+            color: var(--neon-green);
         }
-        .section-title {
-            text-align: left;
+        .section {
+            display: none;
+            padding: 20px;
+        }
+        .section.active {
+            display: block;
+        }
+        .card {
+            background-color: var(--card-dark);
+            padding: 18px;
+            border-radius: 16px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .card h4 {
+            margin: 0 0 8px 0;
+            color: var(--neon-blue);
             font-size: 16px;
-            margin: 20px 0 10px 5px;
-            color: #cbd5e1;
         }
-        .task-card {
-            background: #131c2e;
-            padding: 14px 16px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-align: left;
-            border: 1px solid #1e293b;
+        .card p {
+            margin: 0 0 12px 0;
+            font-size: 13px;
+            color: var(--text-gray);
         }
-        .task-info strong {
-            font-size: 15px;
-            color: #f8fafc;
-        }
-        .task-info small {
-            color: #94a3b8;
-        }
-        button {
-            background: #0284c7;
-            color: white;
+        .btn {
+            background: var(--accent-gradient);
+            color: #000;
             border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 12px;
             font-weight: bold;
+            width: 100%;
+            cursor: pointer;
             font-size: 14px;
             transition: 0.2s;
         }
-        button:active {
-            transform: scale(0.95);
+        .btn:active {
+            transform: scale(0.98);
         }
-        button:disabled {
-            background: #334155;
-            color: #64748b;
-            cursor: not-allowed;
+        .input-box {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: var(--bg-black);
+            color: var(--pure-white);
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--card-dark);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+        }
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .nav-item.active {
+            color: var(--neon-blue);
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header & Wallet -->
-        <div class="header">
-            <div class="wallet-info">
-                <small>Wallet Balance</small>
-                <h3 id="balance">$0.00</h3>
-            </div>
-            <div class="ads-counter">
-                🎁 Ads: <span id="ads-left">20</span>/20
-            </div>
+    <div class="header">
+        <div class="logo">StarVault 💎</div>
+        <div id="username" style="font-size: 13px; color: var(--text-gray);">User</div>
+    </div>
+
+    <div class="balance-card">
+        <div class="balance-title">Total Balance</div>
+        <div class="balance-amount" id="balance">$0.000</div>
+        <div style="font-size: 11px; color: var(--text-gray);">Min. Withdrawal: $5.00</div>
+    </div>
+
+    <!-- Ads Section -->
+    <div id="ads-section" class="section active">
+        <div class="card">
+            <h4>📺 Watch Video Ads</h4>
+            <p>Earn $0.003 per ad. Limit: <span id="ads-count">20</span>/20 today.</p>
+            <button class="btn" onclick="watchAd()">Watch Ad (+$0.003)</button>
         </div>
-
-        <div class="section-title">Earning Tasks</div>
-
-        <!-- Watch Ad Task -->
-        <div class="task-card">
-            <div class="task-info">
-                <strong>Watch Video Ad</strong><br>
-                <small>Earn $0.05 per ad</small>
-            </div>
-            <button id="watch-btn" onclick="showAd()">Watch</button>
-        </div>
-
-        <!-- Daily Check-in Task -->
-        <div class="task-card">
-            <div class="task-info">
-                <strong>Daily Check-in</strong><br>
-                <small>Earn $0.10 daily</small>
-            </div>
-            <button id="checkin-btn" onclick="dailyCheckIn()">Claim</button>
-        </div>
-
-        <!-- Join Community Task -->
-        <div class="task-card">
-            <div class="task-info">
-                <strong>Join Community</strong><br>
-                <small>Earn $0.20 bonus</small>
-            </div>
-            <button id="join-btn" onclick="joinCommunity()">Join</button>
+        <div class="card">
+            <h4>🎁 Daily Reward</h4>
+            <p>Claim your free daily bonus of $0.002.</p>
+            <button class="btn" id="daily-btn" style="background: var(--neon-green); color: #fff;" onclick="claimDaily()">Claim Daily ($0.002)</button>
         </div>
     </div>
+
+    <!-- Tasks Section -->
+    <div id="tasks-section" class="section">
+        <div class="card">
+            <h4>📢 Join Community</h4>
+            <p>Join our official channel to earn $0.08.</p>
+            <button class="btn" id="task-btn" onclick="completeTask()">Join Channel & Earn $0.08</button>
+        </div>
+    </div>
+
+    <!-- Invite Section -->
+    <div id="invite-section" class="section">
+        <div class="card">
+            <h4>👥 Invite Friends</h4>
+            <p>Earn $0.01 for every single referral friend!</p>
+            <input type="text" class="input-box" id="ref-link" readonly value="https://t.me/StarVault_Real_bot">
+            <button class="btn" onclick="copyRef()">Copy Referral Link</button>
+        </div>
+    </div>
+
+    <!-- Withdraw Section -->
+    <div id="withdraw-section" class="section">
+        <div class="card">
+            <h4>💳 Request Withdrawal</h4>
+            <p>Minimum payout is $5.00. Enter your wallet address:</p>
+            <input type="text" class="input-box" id="wallet-input" placeholder="USDT TRC20 Address">
+            <button class="btn" onclick="requestWithdraw()">Withdraw Funds</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="nav-bar">
+        <button class="nav-item active" onclick="switchTab('ads', this)">⚡ Ads</button>
+        <button class="nav-item" onclick="switchTab('tasks', this)">📋 Tasks</button>
+        <button class="nav-item" onclick="switchTab('invite', this)">🔗 Invite</button>
+        <button class="nav-item" onclick="switchTab('withdraw', this)">💵 Withdraw</button>
+    </div>
+
     <script>
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        let userLang = "User";
+        if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            userLang = tg.initDataUnsafe.user.first_name;
+            document.getElementById('username').innerText = userLang;
+            document.getElementById('ref-link').value = https://t.me/StarVault_Real_bot?start=ref_${tg.initDataUnsafe.user.id};
         }
 
-        let balance = parseFloat(localStorage.getItem('starvault_usd_balance')) || 0.00;
-        let lastAdDate = localStorage.getItem('last_ad_date');
-        let todayDate = new Date().toDateString();
-        let adsLeft = parseInt(localStorage.getItem('starvault_ads_left'));
+        let balance = parseFloat(localStorage.getItem('sv_balance')) || 0.000;
+        let adsLeft = localStorage.getItem('sv_adsLeft') !== null ? parseInt(localStorage.getItem('sv_adsLeft')) : 20;
+        let dailyClaimed = localStorage.getItem('sv_dailyClaimed') === 'true';
+        let taskDone = localStorage.getItem('sv_taskDone') === 'true';
 
-        if (lastAdDate !== todayDate || isNaN(adsLeft)) {
-            adsLeft = 20;
-            localStorage.setItem('starvault_ads_left', adsLeft);
-            localStorage.setItem('last_ad_date', todayDate);
+        document.getElementById('balance').innerText = '$' + balance.toFixed(3);
+        document.getElementById('ads-count').innerText = adsLeft;
+
+        if (dailyClaimed) {
+            const dBtn = document.getElementById('daily-btn');
+            dBtn.innerText = 'Already Claimed ✔';
+            dBtn.style.background = '#374151';
         }
 
-        document.getElementById('balance').innerText = "$" + balance.toFixed(2);
-        document.getElementById('ads-left').innerText = adsLeft;
-
-        if (adsLeft <= 0) {
-            document.getElementById('watch-btn').disabled = true;
-            document.getElementById('watch-btn').innerText = "Limit";
+        if (taskDone) {
+            const tBtn = document.getElementById('task-btn');
+            tBtn.innerText = 'Completed ✔';
+            tBtn.style.background = '#374151';
+        }
+        function saveData() {
+            localStorage.setItem('sv_balance', balance);
+            localStorage.setItem('sv_adsLeft', adsLeft);
+            localStorage.setItem('sv_dailyClaimed', dailyClaimed);
+            localStorage.setItem('sv_taskDone', taskDone);
         }
 
-        if (localStorage.getItem('joined_community') === 'true') {
-            let joinBtn = document.getElementById('join-btn');
-            joinBtn.innerText = "Completed";
-            joinBtn.disabled = true;
-        }
-
-        let lastCheckIn = localStorage.getItem('last_checkin_date');
-        if (lastCheckIn === todayDate) {
-            let checkinBtn = document.getElementById('checkin-btn');
-            checkinBtn.innerText = "Claimed";
-            checkinBtn.disabled = true;
-        }
-
-        function updateBalance(amount) {
-            balance += amount;
-            document.getElementById('balance').innerText = "$" + balance.toFixed(2);
-            localStorage.setItem('starvault_usd_balance', balance);
-        }
-
-        // Strict Adsgram Integration (No free fake rewards)
-        let adController = null;
-        if (typeof window.Adsgram !== 'undefined') {
-            adController = window.Adsgram.init({ blockId: "46002" });
-        }
-
-        function showAd() {
-            if (adsLeft <= 0) {
-                alert("You have reached your daily ad limit (20/20)!");
-                return;
-            }
-
-            if (!adController && typeof window.Adsgram !== 'undefined') {
-                adController = window.Adsgram.init({ blockId: "46002" });
-            }
-
-            if (adController) {
-                adController.show().then(() => {
-                    // This runs ONLY when the real Adsgram ad is fully watched
-                    updateBalance(0.05);
-                    adsLeft--;
-                    document.getElementById('ads-left').innerText = adsLeft;
-                    localStorage.setItem('starvault_ads_left', adsLeft);
-                    localStorage.setItem('last_ad_date', new Date().toDateString());
-
-                    if (adsLeft <= 0) {
-                        document.getElementById('watch-btn').disabled = true;
-                        document.getElementById('watch-btn').innerText = "Limit";
-                    }
-                    alert("Success! You earned $0.05");
-                }).catch((err) => {
-                    alert("Ad was skipped or failed to load. No reward given.");
-                });
-            } else {
-                alert("Adsgram ad network is loading. Please try again in a moment.");
+        function triggerHaptic() {
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('medium');
             }
         }
 
-        function dailyCheckIn() {
-            let today = new Date().toDateString();
-            if (localStorage.getItem('last_checkin_date') === today) {
-                alert("You have already claimed your daily reward today!");
-                return;
-            }
-
-            updateBalance(0.10);
-            localStorage.setItem('last_checkin_date', today);
-            let checkinBtn = document.getElementById('checkin-btn');
-            checkinBtn.innerText = "Claimed";
-            checkinBtn.disabled = true;
-            alert("Daily check-in successful! +$0.10");
+        function updateBalance() {
+            document.getElementById('balance').innerText = '$' + balance.toFixed(3);
+            saveData();
         }
 
-        function joinCommunity() {
-            window.open('https://t.me/Star_Vault_Official', '_blank');
-            localStorage.setItem('joined_community', 'true');
-            let joinBtn = document.getElementById('join-btn');
-            joinBtn.innerText = "Completed";
-            joinBtn.disabled = true;
+        function switchTab(tabName, element) {
+            triggerHaptic();
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             
-            updateBalance(0.20);
-            alert("Reward claimed! +$0.20");
+            document.getElementById(tabName + '-section').classList.add('active');
+            element.classList.add('active');
+        }
+
+        //
+        const adController = window.Adsgram.init({
+            blockId: "46107"
+        });
+
+        function watchAd() {
+            triggerHaptic();
+            if (adsLeft <= 0) {
+                alert('You have reached the daily limit of 20 ads!');
+                return;
+            }
+
+            adController.show().then((result) => {
+                balance += 0.003;
+                adsLeft--;
+                document.getElementById('ads-count').innerText = adsLeft;
+                updateBalance();
+                alert('Success! You earned $0.003');
+            }).catch((result) => {
+                alert('Ad skipped or failed to load.');
+            });
+        }
+
+        function claimDaily() {
+            triggerHaptic();
+            if (dailyClaimed) {
+                alert('You already claimed your daily reward today!');
+                return;
+            }
+            balance += 0.002;
+            dailyClaimed = true;
+            
+            const dBtn = document.getElementById('daily-btn');
+            dBtn.innerText = 'Already Claimed ✔';
+            dBtn.style.background = '#374151';
+
+            updateBalance();
+            alert('Successfully claimed $0.002 daily reward!');
+        }
+
+        function completeTask() {
+            triggerHaptic();
+            if (taskDone) {
+                alert('You have already completed this task!');
+                return;
+            }
+
+            window.open('https://t.me/Star_Vault_Official', '_blank');
+
+            setTimeout(() => {
+                balance += 0.08;
+                taskDone = true;
+                
+                const tBtn = document.getElementById('task-btn');
+                tBtn.innerText = 'Completed ✔';
+                tBtn.style.background = '#374151';
+
+                updateBalance();
+                alert('Task verified! Added $0.08 to your balance.');
+            }, 2000);
+        }
+
+        function copyRef() {
+            triggerHaptic();
+            const linkInput = document.getElementById('ref-link');
+            linkInput.select();
+            navigator.clipboard.writeText(linkInput.value);
+            alert('Referral link copied! You will get $0.01 when friends join.');
+        }
+
+        function requestWithdraw() {
+            triggerHaptic();
+            const wallet = document.getElementById('wallet-input').value;
+            if (!wallet) {
+                alert('Please enter your wallet address!');
+                return;
+            }
+            if (balance < 5.00) {
+                alert('Insufficient balance! Minimum withdrawal is $5.00');
+                return;
+            }
+            alert('Withdrawal request submitted successfully!');
         }
     </script>
 </body>
